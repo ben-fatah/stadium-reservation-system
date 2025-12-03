@@ -1,0 +1,112 @@
+==============================
+STADIUM RESERVATION SYSTEM
+==============================
+
+This file explains how to run the project on Ubuntu with Apache, PHP, and MariaDB.
+
+Requirements:
+-------------
+1. Ubuntu OS
+2. Apache2
+3. PHP >= 8
+4. MariaDB
+5. Internet connection (to download Bootstrap CDN)
+
+---
+
+Step 1: Install Apache, PHP, and MariaDB
+----------------------------------------
+sudo apt update
+sudo apt install apache2 php php-mysqli mariadb-server -y
+
+Start services:
+sudo systemctl start apache2
+sudo systemctl start mariadb
+
+Check status:
+sudo systemctl status apache2
+sudo systemctl status mariadb
+
+---
+
+Step 2: Set up Database
+-----------------------
+Login to MariaDB:
+sudo mariadb -u root -p
+
+Create database:
+CREATE DATABASE stadium_db;
+
+(Optional) Create a database user:
+CREATE USER 'stadium_user'@'localhost' IDENTIFIED BY 'password123';
+GRANT ALL PRIVILEGES ON stadium_db.* TO 'stadium_user'@'localhost';
+FLUSH PRIVILEGES;
+
+Import database structure:
+Exit MariaDB, then run in terminal:
+sudo mariadb -u root -p stadium_db < /path/to/stadium_db.sql
+
+---
+
+Step 3: Place project in Apache folder
+--------------------------------------
+Copy the project folder to Apache root:
+sudo cp -r /home/your_user/Desktop/stadium-reservation-system /var/www/html/
+
+Change owner to Apache user:
+sudo chown -R www-data:www-data /var/www/html/stadium-reservation-system
+
+Set permissions:
+sudo chmod -R 755 /var/www/html/stadium-reservation-system
+
+---
+
+Step 4: Configure database connection
+-------------------------------------
+Edit the file:
+frontend/config/database.php (or backend/config/database.php)
+Update:
+$host = 'localhost';
+$db   = 'stadium_db';
+$user = 'stadium_user';      // or 'root'
+$pass = 'password123';
+
+---
+
+Step 5: Open in Browser
+-----------------------
+Go to:
+http://localhost/stadium-reservation-system/frontend/index.html
+
+---
+
+Step 6: Test
+------------
+1. Sign up as Owner and User
+2. Login
+3. Owner: add stadiums, view slots
+4. User: search stadiums, reserve slot
+5. Check messages and dashboard functionality
+
+---
+
+Tips:
+-----
+- If something doesn't work, check Apache error logs:
+  sudo tail -f /var/log/apache2/error.log
+
+- Check console for JavaScript errors (F12 → Console)
+- Check Network tab in browser to see AJAX requests
+
+---
+
+Remember these commands for reference:
+--------------------------------------
+# Copy project
+sudo cp -r /home/your_user/Desktop/stadium-reservation-system /var/www/html/
+
+# Change owner
+sudo chown -R www-data:www-data /var/www/html/stadium-reservation-system
+
+# Change permissions
+sudo chmod -R 755 /var/www/html/stadium-reservation-system

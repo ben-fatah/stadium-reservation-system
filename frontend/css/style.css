@@ -1,0 +1,72 @@
+/* General Body */
+body {
+    background: #f5f7fa; /* لون خلفية هادئ */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar */
+.navbar {
+    border-radius: 0 0 12px 12px;
+}
+
+/* Cards */
+.card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: white;
+}
+
+/* Headings */
+h2, h4, h5 {
+    color: #333;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #2575fc;
+    border: none;
+}
+.btn-primary:hover {
+    background-color: #6a11cb;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border: none;
+}
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Stadium List Cards */
+#stadiumList .card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#stadiumList .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* Tables */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+.table th, .table td {
+    vertical-align: middle !important;
+}
+
+/* Stats List */
+#statsList .list-group-item {
+    background: #f0f0f0;
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #stadiumList .card {
+        margin-bottom: 1rem;
+    }
+}
