@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Home</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-success">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Stadium User</a>
+    <button class="btn btn-light" id="logoutBtn">Logout</button>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h2>Search Stadiums</h2>
+  <form id="searchForm" class="mb-3">
+    <input type="text" name="location" class="form-control mb-2" placeholder="Location">
+    <input type="date" name="date" class="form-control mb-2">
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+
+  <h2>Available Stadiums</h2>
+  <table class="table table-striped" id="stadiumTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Location</th>
+        <th>Date</th>
+        <th>Time Slot</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/user_home.js"></script>
+</body>
+</html>
