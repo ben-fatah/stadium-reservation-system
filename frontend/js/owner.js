@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const formData = new FormData(e.target);
 
-            fetch('../backend/Stadiums/add_stadium.php', {
+            fetch('../backend/Stadiums_Slots/add_stadium.php', {
                 method: 'POST',
                 body: formData
             })
@@ -51,25 +51,28 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Load stadiums function
-function loadStadiums() {
-    fetch('../backend/Stadiums/dashboard.php')
-        .then(res => res.json())
-        .then(data => {
-            const tbody = document.querySelector('#stadiumTable tbody');
-            if (tbody) {
-                tbody.innerHTML = '';
-                data.forEach(stadium => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${stadium.name}</td>
-                            <td>${stadium.location}</td>
-                            <td>${stadium.total_slots || 0}</td>
-                            <td>${stadium.reserved_slots || 0}</td>
-                        </tr>`;
-                });
-            }
-        })
-        .catch(err => {
-            console.error("Failed to load stadiums:", err);
-        });
+function loadStadiums() { 
+    fetch('../backend/Stadiums_Slots/dashboard.php') 
+        .then(res => res.json()) 
+        .then(data => { 
+            const tbody = document.querySelector('#stadiumTable tbody'); 
+            if (tbody) { 
+                tbody.innerHTML = ''; 
+                data.forEach(stadium => { 
+                    tbody.innerHTML += ` 
+                        <tr> 
+                            <td>${stadium.name}</td> 
+                            <td>${stadium.location}</td> 
+                            <td>${stadium.description || ''}</td> 
+                            <td><img src="${stadium.photo}" alt="Stadium Photo" width="100" height="60" style="object-fit: cover;"></td> 
+                            <td>${stadium.total_slots || 0}</td> 
+                            <td>${stadium.reserved_slots || 0}</td> 
+                        </tr>`; 
+                }); 
+            } 
+        }) 
+        .catch(err => { 
+            console.error("Failed to load stadiums:", err); 
+        }); 
 }
+

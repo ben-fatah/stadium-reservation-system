@@ -1,17 +1,22 @@
 <?php
-// Database connection settings
-$host = 'localhost';       // Server, usually localhost
-$db   = 'stadium_db';      // Database name
-$user = 'stadium_user';            // Database username
-$pass = 'password123';                // Database password
+$host = 'localhost';
+$db   = 'stadium_db';
+$user = 'stadium_user';
+$pass = 'password123';
 
-// Create connection
 $conn = new mysqli($host, $user, $pass, $db);
 
-// Check connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    // Check if the request is from JavaScript/fetch
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+        header('Content-Type: application/json');
+        echo json_encode([
+            "status" => "error",
+            "message" => "Database connection failed: " . $conn->connect_error
+        ]);
+    } else {
+        echo "Database connection failed: " . $conn->connect_error;
+    }
+    exit();
 }
-
-// This file can be included in any PHP file that needs DB access
 ?>
