@@ -104,9 +104,15 @@ Remember these commands for reference:
 --------------------------------------
 # Copy project
 sudo cp -r /home/your_user/Desktop/stadium-reservation-system /var/www/html/
+or 
+sudo ln -s /home/abdo/Desktop/stadium-reservation-system /var/www/html/stadium
 
 # Change owner
 sudo chown -R www-data:www-data /var/www/html/stadium-reservation-system
 
 # Change permissions
 sudo chmod -R 755 /var/www/html/stadium-reservation-system
+
+Username: root
+
+Password: YourNewPassword123
