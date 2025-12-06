@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.json())
         .then(data => {
           if (data.status === 'success') {
-            window.location.href = 'index.html'; // ✅ redirection instead of reload
+            window.location.href = 'index.html';
           } else {
             alert("Logout failed: " + data.message);
           }
@@ -29,8 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  loadAvailableSlots();        // load all slots by default
-  loadUserReservations();       // load my reservations
+  loadAvailableSlots();
+  loadUserReservations();
 });
 
 function loadAvailableSlots(location = '', date = '') {
@@ -45,16 +45,21 @@ function loadAvailableSlots(location = '', date = '') {
         return;
       }
 
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No slots found</td></tr>';
+        return;
+      }
+
       data.forEach(slot => {
         const isAvailable = slot.status === 'available';
 
         tbody.innerHTML += `
-          <tr class="${!isAvailable ? 'table-danger' : ''}">
+          <tr class="${!isAvailable ? 'table-secondary' : ''}">
             <td>${slot.name}</td>
             <td>${slot.location}</td>
             <td>${slot.date}</td>
             <td>${slot.time_slot}</td>
-            <td>${slot.status}</td>
+            <td><span class="badge ${isAvailable ? 'bg-success' : 'bg-danger'}">${slot.status}</span></td>
             <td>
               ${isAvailable ? `<button class="btn btn-sm btn-primary" onclick="bookSlot(${slot.slot_id})">Reserve</button>` : ''}
             </td>
@@ -67,6 +72,8 @@ function loadAvailableSlots(location = '', date = '') {
 }
 
 function bookSlot(slotId) {
+  if (!confirm('Do you want to reserve this slot?')) return;
+
   const formData = new FormData();
   formData.append('slot_id', slotId);
 
@@ -92,8 +99,14 @@ function loadUserReservations() {
       const tbody = document.querySelector('#reservationTable tbody');
       tbody.innerHTML = '';
 
-      if (!Array.isArray(data.reservations)) {
+      if (!data.reservations || !Array.isArray(data.reservations)) {
         console.error("Expected array of reservations, got:", data);
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No reservations found</td></tr>';
+        return;
+      }
+
+      if (data.reservations.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">You have no reservations yet</td></tr>';
         return;
       }
 
@@ -103,9 +116,35 @@ function loadUserReservations() {
             <td>${r.stadium_name}</td>
             <td>${r.date}</td>
             <td>${r.time_slot}</td>
-            <td>${r.status}</td>
+            <td><span class="badge bg-success">${r.status}</span></td>
+            <td>
+              <button class="btn btn-sm btn-danger" onclick="cancelReservation(${r.slot_id})">
+                Cancel
+              </button>
+            </td>
           </tr>`;
       });
     })
     .catch(err => console.error("Failed to load reservations:", err));
+}
+
+function cancelReservation(slotId) {
+  if (!confirm('Are you sure you want to cancel this reservation?')) return;
+
+  const formData = new FormData();
+  formData.append('slot_id', slotId);
+
+  fetch('../backend/Reservations/cancel.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert(data.message);
+    if (data.status === 'success') {
+      loadAvailableSlots();
+      loadUserReservations();
+    }
+  })
+  .catch(err => console.error("Cancel error:", err));
 }

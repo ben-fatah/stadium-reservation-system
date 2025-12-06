@@ -1,6 +1,4 @@
-// Wait for DOM to be ready 
 document.addEventListener('DOMContentLoaded', () => { 
-    // Logout 
     const logoutBtn = document.getElementById('logoutBtn'); 
     if (logoutBtn) { 
         logoutBtn.addEventListener('click', () => { 
@@ -20,11 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }); 
     } 
  
-    // Load stadiums initially 
     loadStadiums(); 
-    loadStadiumSelect(); 
+    loadStadiumSelect();
+    loadStatistics();
 
-    // Add stadium 
     const addStadiumForm = document.getElementById('addStadiumForm'); 
     if (addStadiumForm) { 
         addStadiumForm.addEventListener('submit', e => { 
@@ -41,7 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.status === 'success') { 
                         e.target.reset(); 
                         loadStadiums(); 
-                        loadStadiumSelect(); 
+                        loadStadiumSelect();
+                        loadStatistics();
                     } 
                 }) 
                 .catch(err => { 
@@ -51,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }); 
     } 
 
-    // Handle Add Slot form 
     const addSlotForm = document.getElementById('addSlotForm'); 
     if (addSlotForm) { 
         addSlotForm.addEventListener('submit', e => { 
@@ -66,7 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(data => { 
                     alert(data.message); 
                     if (data.status === 'success') { 
-                        addSlotForm.reset(); 
+                        addSlotForm.reset();
+                        loadStadiums();
+                        loadStatistics();
                     } 
                 }) 
                 .catch(err => { 
@@ -77,21 +76,26 @@ document.addEventListener('DOMContentLoaded', () => {
     } 
 }); 
  
-// Load stadiums into table 
 function loadStadiums() {  
     fetch('../backend/Stadiums_Slots/dashboard.php')  
         .then(res => res.json())  
         .then(data => {  
             const tbody = document.querySelector('#stadiumTable tbody');  
             if (tbody) {  
-                tbody.innerHTML = '';  
+                tbody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No stadiums added yet</td></tr>';
+                    return;
+                }
+                
                 data.forEach(stadium => {  
                     tbody.innerHTML += `  
                         <tr>  
                             <td>${stadium.name}</td>  
                             <td>${stadium.location}</td>  
                             <td>${stadium.description || ''}</td>  
-                            <td><img src="${stadium.photo}" alt="Stadium Photo" width="100" height="60" style="object-fit: cover;"></td>  
+                            <td><img src="${stadium.photo}" alt="Stadium Photo" width="100" height="60" style="object-fit: cover; border-radius: 8px;"></td>  
                             <td>${stadium.total_slots || 0}</td>  
                             <td>${stadium.reserved_slots || 0}</td>  
                         </tr>`;  
@@ -103,7 +107,6 @@ function loadStadiums() {
         });  
 } 
  
-//Load stadiums into <select> for slots 
 function loadStadiumSelect() { 
     fetch('../backend/Stadiums_Slots/get_stadiums.php') 
         .then(res => res.json()) 
@@ -111,15 +114,36 @@ function loadStadiumSelect() {
             const select = document.getElementById('stadiumSelect'); 
             if (select) { 
                 select.innerHTML = '<option value="">Select Stadium</option>'; 
-                data.stadiums.forEach(stadium => { 
-                    const option = document.createElement('option'); 
-                    option.value = stadium.id; 
-                    option.textContent = stadium.name; 
-                    select.appendChild(option); 
-                }); 
+                if (data.stadiums && data.stadiums.length > 0) {
+                    data.stadiums.forEach(stadium => { 
+                        const option = document.createElement('option'); 
+                        option.value = stadium.id; 
+                        option.textContent = stadium.name; 
+                        select.appendChild(option); 
+                    });
+                }
             } 
         }) 
         .catch(err => { 
             console.error("Failed to load stadiums into select:", err); 
         }); 
+}
+
+function loadStatistics() {
+    fetch('../backend/Stadiums_Slots/dashboard.php')
+        .then(res => res.json())
+        .then(data => {
+            const totalStadiums = data.length;
+            let totalReservations = 0;
+            
+            data.forEach(stadium => {
+                totalReservations += parseInt(stadium.reserved_slots || 0);
+            });
+            
+            document.getElementById('totalStadiums').textContent = totalStadiums;
+            document.getElementById('totalReservations').textContent = totalReservations;
+        })
+        .catch(err => {
+            console.error("Failed to load statistics:", err);
+        });
 }
