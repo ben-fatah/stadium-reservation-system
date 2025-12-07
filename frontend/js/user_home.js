@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Load both on page load
   loadAvailableSlots();
   loadUserReservations();
 });
@@ -48,12 +49,12 @@ function loadAvailableSlots(location = '', date = '', time_slot = '') {
 
       if (!Array.isArray(data)) {
         console.error("Expected array of slots, got:", data);
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading stadiums</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading stadiums</td></tr>';
         return;
       }
 
       if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No available slots found. Try different search criteria.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No available slots found. Try different search criteria.</td></tr>';
         return;
       }
 
@@ -65,7 +66,6 @@ function loadAvailableSlots(location = '', date = '', time_slot = '') {
 
         tbody.innerHTML += `
           <tr class="${!isAvailable ? 'table-secondary' : ''}">
-            <td><img src="${photoUrl}" alt="Stadium" class="stadium-img" onerror="this.src='https://via.placeholder.com/80x60?text=No+Image'"></td>
             <td><strong>${slot.name}</strong></td>
             <td>${slot.location}</td>
             <td>${slot.date}</td>
@@ -85,7 +85,7 @@ function loadAvailableSlots(location = '', date = '', time_slot = '') {
     .catch(err => {
       console.error("Failed to load slots:", err);
       const tbody = document.querySelector('#stadiumTable tbody');
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load stadiums</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load stadiums</td></tr>';
     });
 }
 
@@ -114,11 +114,25 @@ function bookSlot(slotId) {
 }
 
 function loadUserReservations() {
+  console.log("Loading user reservations...");
+  
   fetch('../backend/Reservations/reservation.php')
-    .then(res => res.json())
+    .then(res => {
+      console.log("Response status:", res.status);
+      return res.json();
+    })
     .then(data => {
+      console.log("Reservations data received:", data);
+      
       const tbody = document.querySelector('#reservationTable tbody');
       tbody.innerHTML = '';
+
+      // Check if response has the expected structure
+      if (data.status === 'error') {
+        console.error("Error from server:", data.message);
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error: ${data.message}</td></tr>`;
+        return;
+      }
 
       if (!data.reservations || !Array.isArray(data.reservations)) {
         console.error("Expected array of reservations, got:", data);
@@ -155,7 +169,7 @@ function loadUserReservations() {
     .catch(err => {
       console.error("Failed to load reservations:", err);
       const tbody = document.querySelector('#reservationTable tbody');
-      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load reservations</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load reservations. Please refresh the page.</td></tr>';
     });
 }
 
