@@ -2,9 +2,9 @@
 $host = 'localhost';
 $db   = 'stadium_db';
 $user = 'stadium_user';
-$pass = 'password123';
+//$pass = 'password123';
 
-$conn = new mysqli($host, $user, $pass, $db);
+$conn = new mysqli($host, $user, /*$pass,*/ $db);
 
 if ($conn->connect_error) {
     // Check if the request is from JavaScript/fetch

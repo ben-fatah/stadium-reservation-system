@@ -5,7 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 
-include __DIR__ . '/../config/database.php';  
+// FIXED: Correct path to database.php (two levels up)
+include __DIR__ . '/../../config/database.php';
 include __DIR__ . '/../Authentication/auth.php'; 
 
 if (!isset($_SESSION['user_id'])) { 
@@ -16,16 +17,16 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id']; 
 
 $stmt = $conn->prepare(" 
-    SELECT  
-        b.id AS slot_id,  
-        s.name AS stadium_name,  
-        b.date,  
-        b.time_slot,  
-        b.status  
+    SELECT
+        b.id AS slot_id,
+        s.name AS stadium_name,
+        b.date,
+        b.time_slot,
+        b.status
     FROM bookings b 
     JOIN stadiums s ON b.stadium_id = s.id 
     WHERE b.user_id = ? 
-    ORDER BY b.date ASC 
+    ORDER BY b.date ASC, b.time_slot ASC
 "); 
 
 if (!$stmt) { 

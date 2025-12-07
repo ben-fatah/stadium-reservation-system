@@ -3,9 +3,9 @@
 $host = 'localhost';
 $db   = 'stadium_db';
 $user = 'stadium_user';  // Change to 'root' if using root
-$pass = 'password123';    // Change to your actual password
+//$pass = 'password123';    // Change to your actual password
 
-$conn = new mysqli($host, $user, $pass, $db);
+$conn = new mysqli($host, $user, /*$pass,*/ $db);
 
 if ($conn->connect_error) {
     // Check if the request is from JavaScript/fetch
