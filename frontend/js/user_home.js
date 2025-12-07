@@ -25,7 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = new FormData(searchForm);
       const location = formData.get('location') || '';
       const date = formData.get('date') || '';
-      loadAvailableSlots(location, date);
+      const time_slot = formData.get('time_slot') || '';
+      loadAvailableSlots(location, date, time_slot);
     });
   }
 
@@ -33,8 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
   loadUserReservations();
 });
 
-function loadAvailableSlots(location = '', date = '') {
-  fetch('../backend/Stadiums_Slots/get_slots.php' + `?location=${encodeURIComponent(location)}&date=${encodeURIComponent(date)}`)
+function loadAvailableSlots(location = '', date = '', time_slot = '') {
+  const params = new URLSearchParams();
+  if (location) params.append('location', location);
+  if (date) params.append('date', date);
+  if (time_slot) params.append('time_slot', time_slot);
+
+  fetch('../backend/Stadiums_Slots/get_slots.php?' + params.toString())
     .then(res => res.json())
     .then(data => {
       const tbody = document.querySelector('#stadiumTable tbody');
@@ -42,32 +48,44 @@ function loadAvailableSlots(location = '', date = '') {
 
       if (!Array.isArray(data)) {
         console.error("Expected array of slots, got:", data);
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading stadiums</td></tr>';
         return;
       }
 
       if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No slots found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No available slots found. Try different search criteria.</td></tr>';
         return;
       }
 
       data.forEach(slot => {
         const isAvailable = slot.status === 'available';
+        const statusClass = isAvailable ? 'status-available' : 'status-reserved';
+        const statusText = isAvailable ? '🟢 AVAILABLE' : '🔴 RESERVED';
+        const photoUrl = slot.photo || 'https://via.placeholder.com/80x60?text=No+Image';
 
         tbody.innerHTML += `
           <tr class="${!isAvailable ? 'table-secondary' : ''}">
-            <td>${slot.name}</td>
+            <td><img src="${photoUrl}" alt="Stadium" class="stadium-img" onerror="this.src='https://via.placeholder.com/80x60?text=No+Image'"></td>
+            <td><strong>${slot.name}</strong></td>
             <td>${slot.location}</td>
             <td>${slot.date}</td>
             <td>${slot.time_slot}</td>
-            <td><span class="badge ${isAvailable ? 'bg-success' : 'bg-danger'}">${slot.status}</span></td>
+            <td><span class="${statusClass}">${statusText}</span></td>
             <td>
-              ${isAvailable ? `<button class="btn btn-sm btn-primary" onclick="bookSlot(${slot.slot_id})">Reserve</button>` : ''}
+              ${isAvailable ? 
+                `<button class="btn btn-sm btn-reserve" onclick="bookSlot(${slot.slot_id})">
+                  🎯 Reserve
+                </button>` : 
+                '<span class="text-muted">Not Available</span>'
+              }
             </td>
           </tr>`;
       });
     })
     .catch(err => {
       console.error("Failed to load slots:", err);
+      const tbody = document.querySelector('#stadiumTable tbody');
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load stadiums</td></tr>';
     });
 }
 
@@ -89,7 +107,10 @@ function bookSlot(slotId) {
       loadUserReservations();
     }
   })
-  .catch(err => console.error("Reservation error:", err));
+  .catch(err => {
+    console.error("Reservation error:", err);
+    alert("Failed to make reservation. Please try again.");
+  });
 }
 
 function loadUserReservations() {
@@ -106,26 +127,36 @@ function loadUserReservations() {
       }
 
       if (data.reservations.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">You have no reservations yet</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">You have no reservations yet. Search and book a stadium above! ⚽</td></tr>';
         return;
       }
 
       data.reservations.forEach(r => {
+        const statusClass = r.status === 'reserved' ? 'status-reserved' : 'status-available';
+        const statusText = r.status === 'reserved' ? '🔴 RESERVED' : '🟢 AVAILABLE';
+
         tbody.innerHTML += `
           <tr>
-            <td>${r.stadium_name}</td>
+            <td><strong>${r.stadium_name}</strong></td>
             <td>${r.date}</td>
             <td>${r.time_slot}</td>
-            <td><span class="badge bg-success">${r.status}</span></td>
+            <td><span class="${statusClass}">${statusText}</span></td>
             <td>
-              <button class="btn btn-sm btn-danger" onclick="cancelReservation(${r.slot_id})">
-                Cancel
-              </button>
+              ${r.status === 'reserved' ? 
+                `<button class="btn btn-sm btn-danger" onclick="cancelReservation(${r.slot_id})">
+                  ❌ Cancel
+                </button>` : 
+                '<span class="text-muted">-</span>'
+              }
             </td>
           </tr>`;
       });
     })
-    .catch(err => console.error("Failed to load reservations:", err));
+    .catch(err => {
+      console.error("Failed to load reservations:", err);
+      const tbody = document.querySelector('#reservationTable tbody');
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load reservations</td></tr>';
+    });
 }
 
 function cancelReservation(slotId) {
@@ -146,5 +177,8 @@ function cancelReservation(slotId) {
       loadUserReservations();
     }
   })
-  .catch(err => console.error("Cancel error:", err));
+  .catch(err => {
+    console.error("Cancel error:", err);
+    alert("Failed to cancel reservation. Please try again.");
+  });
 }

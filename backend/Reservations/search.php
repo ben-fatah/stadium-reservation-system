@@ -1,15 +1,19 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-include '../config/db.php';
-// auth optional: if you want only logged in users, uncomment next two lines
-// include '../Authentication/auth.php';
-// if (!isset($_SESSION['user_id'])) { echo json_encode([]); exit(); }
+include '../../config/database.php';
+
+// Optional: require authentication
+// session_start();
+// if (!isset($_SESSION['user_id'])) { 
+//     echo json_encode(["status" => "error", "message" => "Unauthorized"]); 
+//     exit(); 
+// }
 
 $location  = isset($_GET['location']) ? trim($_GET['location']) : '';
 $date      = isset($_GET['date']) ? trim($_GET['date']) : '';
 $time_slot = isset($_GET['time_slot']) ? trim($_GET['time_slot']) : '';
 
-// Base query: left join bookings so stadiums without slots still appear (slot_id NULL)
+// Base query with stadium info and slots
 $sql = "
     SELECT 
         s.id AS stadium_id,
@@ -29,22 +33,27 @@ $sql = "
 $params = [];
 $types = '';
 
-// filters
+// Filters
 if ($location !== '') {
     $sql .= " AND s.location LIKE ?";
     $params[] = "%$location%";
     $types .= 's';
 }
+
 if ($date !== '') {
     $sql .= " AND b.date = ?";
     $params[] = $date;
     $types .= 's';
 }
+
 if ($time_slot !== '') {
     $sql .= " AND b.time_slot = ?";
     $params[] = $time_slot;
     $types .= 's';
 }
+
+// Only show available slots or stadiums with no slots yet
+$sql .= " AND (b.status = 'available' OR b.status IS NULL)";
 
 $sql .= " ORDER BY s.name ASC, b.date ASC, b.time_slot ASC";
 
@@ -71,6 +80,6 @@ while ($r = $res->fetch_assoc()) {
 }
 
 $stmt->close();
-echo json_encode($rows);
+echo json_encode(["status" => "success", "stadiums" => $rows]);
 $conn->close();
 ?>

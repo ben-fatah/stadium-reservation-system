@@ -126,5 +126,5 @@ switch($action){
         break;
 }
 
-$conn->close();     
-?>  
+$conn->close();
+?>
